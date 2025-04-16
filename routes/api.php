@@ -26,6 +26,8 @@ Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, '
 Route::apiResource('salles', \App\Http\Controllers\SalleController::class);
 Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
 
-
+// Material API Routes
+Route::apiResource('materials', \App\Http\Controllers\MaterialReservationController::class);
+Route::post('materials/update/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'update']);
 
 

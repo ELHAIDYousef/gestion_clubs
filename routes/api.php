@@ -21,3 +21,11 @@ use Illuminate\Support\Facades\Route;
 // Club API Routes
 Route::apiResource('clubs', \App\Http\Controllers\ClubController::class);
 Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, 'update']);
+
+// Salle API Routes
+Route::apiResource('salles', \App\Http\Controllers\SalleController::class);
+Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
+
+
+
+

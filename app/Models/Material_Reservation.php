@@ -10,6 +10,7 @@ class Material_Reservation extends Model
     use HasFactory;
     protected $fillable = [
         'pdf_demande',
+        'club_id',
     ];
 
     // Optional: if it's linked to a club

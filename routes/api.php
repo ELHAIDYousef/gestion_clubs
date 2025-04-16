@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+
+// Club API Routes
+Route::apiResource('clubs', \App\Http\Controllers\ClubController::class);
+Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, 'update']);

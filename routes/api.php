@@ -30,4 +30,8 @@ Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class,
 Route::apiResource('materials', \App\Http\Controllers\MaterialReservationController::class);
 Route::post('materials/update/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'update']);
 
+// Material API Routes
+Route::apiResource('salle_reservation', \App\Http\Controllers\SalleReservationController::class);
+Route::post('salle_reservation/update/{id}', [\App\Http\Controllers\SalleReservationController::class, 'update']);
+
 

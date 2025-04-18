@@ -182,6 +182,56 @@ class ClubController extends Controller
         }
     }
 
+
+    /**
+     * Search for clubs based on query parameters.
+     */
+    public function search(Request $request)
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'name' => 'nullable|string|max:255', // Search by club name
+                'email' => 'nullable|email|max:255', // Search by email
+                'active' => 'nullable|boolean',      // Filter by active status
+            ]);
+
+            // Build the query dynamically based on the provided filters
+            $query = Club::query();
+
+            if ($request->has('name')) {
+                $query->where('name', 'like', '%' . $request->input('name') . '%');
+            }
+
+            if ($request->has('email')) {
+                $query->where('email', '=', $request->input('email'));
+            }
+
+            if ($request->has('active')) {
+                $active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
+                $query->where('active', '=', $active);
+            }
+
+            // Execute the query and retrieve matching clubs
+            $clubs = $query->get()->map(function ($club) {
+                return $this->formatClubResponse($club);
+            });
+
+            Log::info('Search clubs', ['filters' => $validatedData]);
+
+            return response()->json($clubs);
+
+        } catch (\Exception $e) {
+            Log::error('Error searching clubs: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     /**
      * Format the club response for consistency.
      */

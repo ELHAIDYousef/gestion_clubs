@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('salles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->boolean('availability')->default(false);
+            $table->boolean('availability')->default(true);
             $table->timestamps();
         });
     }

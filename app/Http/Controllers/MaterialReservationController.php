@@ -72,38 +72,79 @@ class MaterialReservationController extends Controller
     /**
      * Update the specified material reservation in storage.
      */
+    /**
+     * Update only the 'pdf_demande' of a specific material reservation.
+     */
     public function update(Request $request, $id)
     {
         try {
+            // Find the reservation by ID
             $reservation = Material_Reservation::find($id);
             if (!$reservation) {
                 return response()->json(['message' => 'Material reservation not found'], 404);
             }
 
+            // Validate the incoming request data
             $validatedData = $request->validate([
-                'club_id' => 'nullable|exists:clubs,id',
-                'pdf_demande' => 'nullable|file|mimes:pdf|max:2048',
-                'status' => 'nullable|in:pending,approved,rejected', // Validate status
+                'pdf_demande' => 'required|file|mimes:pdf|max:2048', // Ensure a valid PDF file is provided
             ]);
 
-            // Handle PDF upload if a new file is provided
-            if ($request->hasFile('pdf_demande')) {
-                $this->deleteOldPdf($reservation);
-                $reservation->pdf_demande = $this->handlePdfUpload($request);
-            }
+            // Handle PDF upload
+            $this->deleteOldPdf($reservation); // Delete the old PDF if it exists
+            $reservation->pdf_demande = $this->handlePdfUpload($request);
 
-            // Update fields
-            $reservation->club_id = $validatedData['club_id'] ?? $reservation->club_id;
-            $reservation->status = $validatedData['status'] ?? $reservation->status; // Update status
+            // Save the updated reservation
             $reservation->save();
 
+            Log::info('Updated pdf_demande for material reservation', ['reservation_id' => $id]);
+
+            // Return the updated reservation
             return response()->json([
-                'message' => 'Material reservation updated successfully',
+                'message' => 'Material reservation PDF updated successfully',
                 'reservation' => $this->formatReservationResponse($reservation),
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error updating material reservation: ' . $e->getMessage(), [
+            Log::error('Error updating material reservation PDF: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update the 'status' of a specific material reservation.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            // Find the reservation by ID
+            $reservation = Material_Reservation::find($id);
+            if (!$reservation) {
+                return response()->json(['message' => 'Material reservation not found'], 404);
+            }
+
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'status' => 'required|in:approved,rejected', // Only allow "approved" or "rejected"
+            ]);
+
+            // Update the 'status' field
+            $reservation->update(['status' => $validatedData['status']]);
+
+            Log::info('Updated status for material reservation', ['reservation_id' => $id, 'status' => $validatedData['status']]);
+
+            // Return the updated reservation
+            return response()->json([
+                'message' => 'Material reservation status updated successfully',
+                'reservation' => $this->formatReservationResponse($reservation),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating material reservation status: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
             ]);
             return response()->json([

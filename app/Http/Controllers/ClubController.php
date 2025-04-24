@@ -20,7 +20,7 @@ class ClubController extends Controller
             return $this->formatClubResponse($club);
         });
 
-        Log::info('Get all clubs');
+        //Log::info('Get all clubs');
 
         return response()->json($clubs);
     }
@@ -53,7 +53,7 @@ class ClubController extends Controller
                 'active' => $active,
             ]);
 
-            Log::info('Store one club');
+            //Log::info('Store one club');
 
             // Return JSON response
             return response()->json([
@@ -81,7 +81,7 @@ class ClubController extends Controller
         if (!$club) {
             return response()->json(['message' => 'Club not found'], 404);
         }
-        Log::info('Show club');
+        //Log::info('Show club');
 
         return response()->json($this->formatClubResponse($club));
     }
@@ -133,7 +133,7 @@ class ClubController extends Controller
             unset($validatedData['logo']);
             $club->update($validatedData);
 
-            Log::info('Update one club');
+            //Log::info('Update one club');
 
             // Return the updated club
             return response()->json([
@@ -143,6 +143,53 @@ class ClubController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error updating club: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    /**
+     * Update the 'active' status of a specific club.
+     */
+    public function updateActiveStatus(Request $request, $id)
+    {
+        try {
+            // Find the club by ID
+            $club = Club::find($id);
+            if (!$club) {
+                return response()->json(['message' => 'Club not found'], 404);
+            }
+
+            $active = $club->active;
+
+            if ($request->input('active')){
+                $active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
+            }
+
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'active' => 'required|string|in:true,false|max:5', // Ensure 'active' is provided and is a boolean
+            ]);
+
+            $validatedData['active'] = $active;
+
+
+            // Update the 'active' field
+            $club->update(['active' => $validatedData['active']]);
+
+            Log::info('Updated active status for club', ['club_id' => $id, 'active' => $validatedData['active']]);
+
+            // Return the updated club
+            return response()->json([
+                'message' => 'Club active status updated successfully',
+                'club' => $this->formatClubResponse($club),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating club active status: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
             ]);
             return response()->json([
@@ -169,62 +216,12 @@ class ClubController extends Controller
             // Delete the club
             $club->delete();
 
-            Log::info('Delete one club');
+            //Log::info('Delete one club');
 
             return response()->json(['message' => 'Club deleted successfully']);
 
         } catch (\Exception $e) {
             Log::error('Error deleting club: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Something went wrong!',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-    /**
-     * Search for clubs based on query parameters.
-     */
-    public function search(Request $request)
-    {
-        try {
-            // Validate the incoming request data
-            $validatedData = $request->validate([
-                'name' => 'nullable|string|max:255', // Search by club name
-                'email' => 'nullable|email|max:255', // Search by email
-                'active' => 'nullable|boolean',      // Filter by active status
-            ]);
-
-            // Build the query dynamically based on the provided filters
-            $query = Club::query();
-
-            if ($request->has('name')) {
-                $query->where('name', 'like', '%' . $request->input('name') . '%');
-            }
-
-            if ($request->has('email')) {
-                $query->where('email', '=', $request->input('email'));
-            }
-
-            if ($request->has('active')) {
-                $active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
-                $query->where('active', '=', $active);
-            }
-
-            // Execute the query and retrieve matching clubs
-            $clubs = $query->get()->map(function ($club) {
-                return $this->formatClubResponse($club);
-            });
-
-            Log::info('Search clubs', ['filters' => $validatedData]);
-
-            return response()->json($clubs);
-
-        } catch (\Exception $e) {
-            Log::error('Error searching clubs: ' . $e->getMessage(), [
-                'request_data' => $request->all(),
-            ]);
             return response()->json([
                 'message' => 'Something went wrong!',
                 'error' => $e->getMessage(),

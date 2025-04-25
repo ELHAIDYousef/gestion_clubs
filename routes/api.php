@@ -1,9 +1,13 @@
 <?php
 
 
+use App\Http\Controllers\ActivityController;
+use Illuminate\Http\Request;
+use App\Http\Controllers\EventsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserManagementController;
+
 
 
 /*
@@ -58,6 +62,34 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
 
 });
 
+    // les route de les eventement
+    Route::controller(EventsController::class)->group(function () {
+        Route::get('/announcements', 'index');
+        Route::get('/announcements/{id}', 'show');
+    });
+    // ce rout pour obteuner les evenements de chaque club
+    Route::get('/Clubannouncements/{id}',[EventsController::class,'clubEvent']);
+    // les route de les eventement avec authentification
+    Route::controller(EventsController::class)->group(function () {
+        Route::post('/announcements', 'store');
+        Route::delete('/announcements/{id}', 'destroy');
+        Route::post('/announcements/{id}', 'update'); // Ou utiliser PUT avec _method
+    });
+    // rout activite
+    Route::controller(ActivityController::class)->group(function () {
+        Route::get('/activities', 'index');
+        Route::get('/activities/{id}', 'show');
+    });
+     // rout activite avec authentification
+     Route::controller(ActivityController::class)->group(function () {
+        Route::post('/activities', 'store');
+        Route::delete('/activities/{id}', 'destroy');
+        Route::post('/activities/{id}', 'update'); // Ou utiliser PUT avec _method
+    });
+    // ce rout pour obteuner les activite de chaque club
+    Route::get('/ClubActivity/{id}',[ActivityController::class,'clubActivity']);
+
+
 // Only club Admin
 Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
 
@@ -79,8 +111,5 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
     Route::post('salle_reservation/update/{id}', [\App\Http\Controllers\SalleReservationController::class, 'update']);
 
 });
-
-
-
 
 

@@ -16,8 +16,12 @@ class Club extends Model
         'email',
         'phone',
         'facebook',
-        'instagram'
+        'instagram',
+        'active'
     ];
+
+
+
 
     public function announcements()
     {

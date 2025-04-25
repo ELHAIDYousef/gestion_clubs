@@ -10,6 +10,7 @@ class Activity extends Model
     use HasFactory;
 
     protected $fillable = [
+        'club_id',
         'title',
         'description',
         'images'

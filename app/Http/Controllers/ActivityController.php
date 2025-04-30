@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ActivityController extends Controller
 {
-    // cette function a comme objective 
+    // cette function a comme objective
     public function store(Request $req){
         try{
             $images=$req->file('image');
@@ -19,11 +19,11 @@ class ActivityController extends Controller
                     $image->move(public_path('Activity'),$patheName);
                     $path='Activity/'.$patheName;
                     $paths[]=$path;
-                }   
+                }
             }
             $jsonImage=json_encode($paths);
             $tab=Activity::create([
-                'club_id'=>$req->id_club,
+                'club_id'=>$req->club_id,
                 'title'=>$req->title,
                 'description'=>$req->description,
                 'images'=>$jsonImage
@@ -34,7 +34,7 @@ class ActivityController extends Controller
             return response()->JSON(["message"=>"Something went worng!",
                                      "errer"=>$e->getMessage()]);
         }
-       
+
 
     }
     //cette fonction pour obtuner les 10 dernier Activite
@@ -54,7 +54,7 @@ class ActivityController extends Controller
             return response()->JSON(["message"=>"Something went worng!",
                                      "errer"=>$e->getMessage()]);
         }
-        
+
     }
     //cette fonction pour obtuner un activite
     public function show($id){
@@ -75,7 +75,7 @@ class ActivityController extends Controller
             return response()->JSON(["message"=>"Activity does not exist.",
                                      "errer"=>$e->getMessage()]);
         }
-        
+
     }
     // cette fonction permet de supremer les activity
     public function destroy($id){
@@ -91,7 +91,7 @@ class ActivityController extends Controller
                 $element->delete();
                 return response()->JSON(["message"=>"Delete sucssufly !",
                                         "Activity"=>$element]);
-            }  
+            }
 
         }catch(Exception $e){
             return response()->JSON(["message"=>"Something went worng!",
@@ -119,7 +119,7 @@ class ActivityController extends Controller
                             $image->move(public_path('Activity'),$patheName);
                             $path='Activity/'.$patheName;
                             $paths[]=$path;
-                        }   
+                        }
                     }
                 $jsonImage=json_encode($paths);
                 $element->title=$req->title;
@@ -130,14 +130,14 @@ class ActivityController extends Controller
             }else{
                 return response()->JSON(["message"=>"Something went worng!"]);
             }
-            
+
         }catch(Exception $e){
             return response()->JSON(["message"=>"Something went worng!",
                                      "erre"=>$e->getMessage()
 
             ]);
         }
-        
+
 
     }
     // cette fonction pour donne les activiti d'un club spécifique
@@ -153,13 +153,13 @@ class ActivityController extends Controller
             }else{
                 return response()->JSON(["message","Something went worng"]);
             }
-            
+
         }catch(Exception $e){
             return response()->JSON(["message"=>"Something went worng",
                                       "errer"=>$e->getMessage()
                                     ]);
         }
-        
+
     }
 }
 

@@ -130,25 +130,20 @@ class SalleReservationController extends Controller
                 return response()->json(['message' => 'Salle reservation not found'], 404);
             }
 
-            // Validate the incoming request data
             $validatedData = $request->validate([
                 'salle_id' => 'nullable|exists:salles,id',
                 'club_id' => 'nullable|exists:clubs,id',
                 'reason' => 'nullable|string|max:255',
                 'date' => 'nullable|date',
-                'status' => 'nullable|in:pending,accepted,rejected',
             ]);
 
-            // Update fields
             $reservation->salle_id = $validatedData['salle_id'] ?? $reservation->salle_id;
             $reservation->club_id = $validatedData['club_id'] ?? $reservation->club_id;
             $reservation->reason = $validatedData['reason'] ?? $reservation->reason;
             $reservation->date = $validatedData['date'] ?? $reservation->date;
-            $reservation->status = $validatedData['status'] ?? $reservation->status;
 
             $reservation->save();
 
-            // Return the updated reservation
             return response()->json([
                 'message' => 'Salle reservation updated successfully',
                 'reservation' => $this->formatReservationResponse($reservation),
@@ -164,6 +159,38 @@ class SalleReservationController extends Controller
             ], 500);
         }
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $reservation = Salle_Reservation::find($id);
+            if (!$reservation) {
+                return response()->json(['message' => 'Salle reservation not found'], 404);
+            }
+
+            $validatedData = $request->validate([
+                'status' => 'required|in:pending,accepted,rejected',
+            ]);
+
+            $reservation->status = $validatedData['status'];
+            $reservation->save();
+
+            return response()->json([
+                'message' => 'Status updated successfully',
+                'reservation' => $this->formatReservationResponse($reservation),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating salle reservation status: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     /**
      * Remove the specified salle reservation from storage.

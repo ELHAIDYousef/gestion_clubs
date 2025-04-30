@@ -40,13 +40,23 @@ class EventsController extends Controller{
             }
     }
     // cette  fonction permmet de liste tous les 10 evenement dernier
-    public function index(){
+    public function index(Request $req){
         try{
-            $tab=Announcement::orderBy('id', 'desc')->limit(10)->get();
-            foreach($tab as $ele){
+            $serche=$req->query('searche');
+            if(!empty($serche)){
+                $tab=Announcement::where("title","like","%$serche%")->orWhere("description","like","%$serche%")->get();
+            } else{
+                $tab=Announcement::orderBy('id', 'desc')->limit(10)->get();
+                foreach($tab as $ele){
                 $ele->image=asset($ele->image);
             }
-            return response()->JSON(["les 10 dérnire event"=>$tab]);
+            }
+            if(empty($tab)){
+                return response()->JSON(["Message"=>"Note found"]);    
+            }else{
+                return response()->JSON(["les 10 dérnire event"=>$tab]);
+            }
+            
         }catch(Exception $e){
             return response()->JSON(["message"=>"Something went worng!",
                                      "errer"=>$e->getMessage()]);

@@ -5,6 +5,7 @@ use App\Models\Activity;
 use Exception;
 use App\Models\Club;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Action;
 
 class ActivityController extends Controller
 {
@@ -38,18 +39,38 @@ class ActivityController extends Controller
 
     }
     //cette fonction pour obtuner les 10 dernier Activite
-    public function index(){
+    public function index(Request $req){
         try{
-            $tab=Activity::orderby("id","desc")->limit(10)->get();
-            foreach($tab as $ele){
-                $images=json_decode($ele->images);
-                $pthe=[];
-                foreach($images as $image){
-                    $pthe[]=asset($image);
+            $serche=$req->query('searche');
+            if(!empty($serche)){
+                $tab=Activity::where("title","like","%$serche%")->orWhere("description","like","%$serche%")->get();
+                foreach($tab as $ele){
+                    $images=json_decode($ele->images);
+                    $pthe=[];
+                    foreach($images as $image){
+                        $pthe[]=asset($image);
+                    }
+                    $ele->images=$pthe;
                 }
-                $ele->images=$pthe;
             }
-            return response()->json(["Last 10 Activities"=>$tab]);
+            else{
+                $tab=Activity::orderby("id","desc")->limit(10)->get();
+                foreach($tab as $ele){
+                    $images=json_decode($ele->images);
+                    $pthe=[];
+                    foreach($images as $image){
+                        $pthe[]=asset($image);
+                    }
+                    $ele->images=$pthe;
+                }
+            }
+            if(count($tab)==0){
+                return response()->JSON(["Message"=>"Note found"]);    
+            }else{
+                return response()->json(["Last 10 Activities"=>$tab]);;
+            }
+            
+            
         }catch(Exception $e){
             return response()->JSON(["message"=>"Something went worng!",
                                      "errer"=>$e->getMessage()]);

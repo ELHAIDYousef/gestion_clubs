@@ -22,7 +22,7 @@ class EventsController extends Controller{
                     // crée l'evenement on le basse de donne et bien sur en stoke l'image le chemis de l'image
                     $pathimage='Events/'.$uploadImageName;
                     $event=Announcement::create([
-                        'club_id'=>$req->id_club,
+                        'club_id'=>$req->club_id,
                         'title'=>$req->title,
                         'description'=>$req->description,
                         'image'=>$pathimage,
@@ -31,7 +31,7 @@ class EventsController extends Controller{
                         'message' => 'Event created successfully',
                         'Event' => $event,
                     ],201);
-            } 
+            }
         }catch(Exception $e){
             return response()->json([
                 'message' => 'Something went wrong!',
@@ -51,7 +51,7 @@ class EventsController extends Controller{
             return response()->JSON(["message"=>"Something went worng!",
                                      "errer"=>$e->getMessage()]);
         }
-        
+
     }
     // cette  fonction permmet return un evenement en utilisen sont id
     public function show($id){
@@ -70,7 +70,7 @@ class EventsController extends Controller{
             $event=Announcement::find($id);
             $imag=$req->file('image');
             $uploadImageName=time()."_".uniqid().".".$imag->getClientOriginalExtension();
-            
+
             $pathimage='Events/'.$uploadImageName;
             // le lighne de l'image pricident
             if(!empty($event->image)){
@@ -124,7 +124,7 @@ class EventsController extends Controller{
                                       "errer"=>$e->getMessage()
                                     ]);
         }
-        
+
     }
 
 }

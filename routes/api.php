@@ -1,115 +1,157 @@
 <?php
 
-
-use App\Http\Controllers\ActivityController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\EventsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserManagementController;
-
-
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
+| Fichier principal des routes API de l'application de gestion des clubs.
+| Toutes les routes sont organisées par rôle :
+| - Public (accessible sans authentification)
+| - Authentifié
+| - Super Admin
+| - Admin Club
+|--------------------------------------------------------------------------
 */
 
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
+/*
+|--------------------------------------------------------------------------
+| ROUTES PUBLIQUES (visibles par tout le monde)
+|--------------------------------------------------------------------------
+*/
 
-// Club API Routes
+// Liste de tous les clubs
 Route::get('clubs', [\App\Http\Controllers\ClubController::class, 'index']);
+
+// Détails d’un club spécifique
 Route::get('clubs/{id}', [\App\Http\Controllers\ClubController::class, 'show']);
 
+// Liste de toutes les annonces (événements)
+Route::get('/announcements', [\App\Http\Controllers\EventsController::class, 'index']);
 
-// Auth
+// Détails d'une annonce
+Route::get('/announcements/{id}', [\App\Http\Controllers\EventsController::class, 'show']);
+
+// Annonces d’un club spécifique
+Route::get('/Clubannouncements/{id}', [\App\Http\Controllers\EventsController::class, 'clubEvent']);
+
+// Liste de toutes les activités
+Route::get('/activities', [\App\Http\Controllers\ActivityController::class, 'index']);
+
+// Détail d'une activité
+Route::get('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'show']);
+
+// Activités d’un club spécifique
+Route::get('/ClubActivity/{id}', [\App\Http\Controllers\ActivityController::class, 'clubActivity']);
+
+
+
+/*
+|--------------------------------------------------------------------------
+ ROUTES AUTHENTIFIÉES (nécessitent un token valide)
+|--------------------------------------------------------------------------
+*/
+
+// Connexion
 Route::post('/login', [AuthController::class, 'login']);
+
 Route::middleware('auth:sanctum')->group(function () {
+    // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Obtenir les infos de l’utilisateur connecté
     Route::get('/me', [AuthController::class, 'me']);
 
-
 });
 
-// Only Super Admin
+
+/*
+|--------------------------------------------------------------------------
+| ROUTES SUPER ADMIN (accessible uniquement par super_admin)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
+
+    // Création d’un compte admin de club
     Route::post('/admins', [UserManagementController::class, 'createClubAdmin']);
-    // Club API Routes
+
+    // Ajout d’un club
     Route::post('clubs', [\App\Http\Controllers\ClubController::class, 'store']);
+    // Activer/désactiver un club
     Route::post('/clubs/{id}/active', [\App\Http\Controllers\ClubController::class, 'updateActiveStatus']);
+    // Supprimer un club
     Route::delete('clubs/{id}', [\App\Http\Controllers\ClubController::class, 'destroy']);
 
-    // Salle API Routes
+    // Gestion des salles (CRUD)
     Route::apiResource('salles', \App\Http\Controllers\SalleController::class);
+    // Mise à jour personnalisée d’une salle
     Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
 
-    // Material API Routes
-    Route::post('/material-reservations/{id}/status', [\App\Http\Controllers\MaterialReservationController::class, 'updateStatus']);
+    // Liste de tous les matériels
     Route::get('materials', [\App\Http\Controllers\MaterialReservationController::class, 'index']);
+    // Détails d’un matériel
     Route::get('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'show']);
+    // Mise à jour du statut d’une réservation de matériel
+    Route::post('/materials/{id}/status', [\App\Http\Controllers\MaterialReservationController::class, 'updateStatus']);
 
-    // Salles API Routes
+
+    // Liste des réservations de salle
     Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
+    // Détail d’une réservation de salle
     Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+    // Mise à jour du statut d'une réservation de salle
+    Route::post('salle_reservation/{id}/status', [\App\Http\Controllers\SalleReservationController::class, 'updateStatus']);
 
 });
 
-    // les route de les eventement
-    Route::controller(EventsController::class)->group(function () {
-        Route::get('/announcements', 'index');
-        Route::get('/announcements/{id}', 'show');
-    });
-    // ce rout pour obteuner les evenements de chaque club
-    Route::get('/Clubannouncements/{id}',[EventsController::class,'clubEvent']);
-    // les route de les eventement avec authentification
-    Route::controller(EventsController::class)->group(function () {
-        Route::post('/announcements', 'store');
-        Route::delete('/announcements/{id}', 'destroy');
-        Route::post('/announcements/{id}', 'update'); // Ou utiliser PUT avec _method
-    });
-    // rout activite
-    Route::controller(ActivityController::class)->group(function () {
-        Route::get('/activities', 'index');
-        Route::get('/activities/{id}', 'show');
-    });
-     // rout activite avec authentification
-     Route::controller(ActivityController::class)->group(function () {
-        Route::post('/activities', 'store');
-        Route::delete('/activities/{id}', 'destroy');
-        Route::post('/activities/{id}', 'update'); // Ou utiliser PUT avec _method
-    });
-    // ce rout pour obteuner les activite de chaque club
-    Route::get('/ClubActivity/{id}',[ActivityController::class,'clubActivity']);
 
+/*
+|-------------------------------------------------------------------------- ROUTES ADMIN CLUB (accessible uniquement par admin_club)
+|--------------------------------------------------------------------------
+*/
 
-// Only club Admin
 Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
 
-    // Clubs API Routes
+    // Mettre à jour un club (son propre club)
     Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, 'update']);
+    // Activer/désactiver un club
+    Route::post('/clubs/{id}/active', [\App\Http\Controllers\ClubController::class, 'updateActiveStatus']);
 
-    // Material API Routes
-    Route::delete('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'destroy']);
-    Route::post('materials/update/{id}', [\App\Http\Controllers\SalleReservationController::class, 'update']);
+    // Créer une réservation de matériel
     Route::post('materials', [\App\Http\Controllers\MaterialReservationController::class, 'store']);
+    // Mettre à jour une réservation de matériel
+    Route::post('materials/update/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'update']);
+    // Supprimer une réservation de matériel
+    Route::delete('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'destroy']);
 
-    // Salle API Routes
-
-    // Salles reservation API Routes
+    // Liste des réservations de salle (du club)
     Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
-    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
-    Route::delete('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'destroy']);
+    // Créer une réservation de salle
     Route::post('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'store']);
+    // Détail d’une réservation de salle
+    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+    // Mettre à jour une réservation de salle
     Route::post('salle_reservation/update/{id}', [\App\Http\Controllers\SalleReservationController::class, 'update']);
+    // Supprimer une réservation de salle
+    Route::delete('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'destroy']);
+
+    // Créer une annonce
+    Route::post('/announcements', [\App\Http\Controllers\EventsController::class, 'store']);
+    // Mettre à jour une annonce
+    Route::post('/announcements/{id}', [\App\Http\Controllers\EventsController::class, 'update']);
+    // Supprimer une annonce
+    Route::delete('/announcements/{id}', [\App\Http\Controllers\EventsController::class, 'destroy']);
+
+    // Créer une activité
+    Route::post('/activities', [\App\Http\Controllers\ActivityController::class, 'store']);
+    // Mettre à jour une activité
+    Route::post('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'update']);
+    // Supprimer une activité
+    Route::delete('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'destroy']);
 
 });
-
-

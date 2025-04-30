@@ -19,7 +19,7 @@ class UserManagementController extends Controller
             'club_id' => 'required|exists:clubs,id',
         ]);
 
-        // Génère 1 lettre majuscule + 3 lettres minuscules + 4 chiffres
+        // Génère 1 lettre majuscule + 3 lettres minuscules + 4 chiffre
         $firstLetter = Str::upper(Str::random(1));
         $nextLetters = Str::lower(Str::random(3));
         $numbers = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);

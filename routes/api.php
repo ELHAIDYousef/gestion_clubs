@@ -13,10 +13,35 @@ use App\Http\Controllers\UserManagementController;
 | Toutes les routes sont organisées par rôle :
 | - Public (accessible sans authentification)
 | - Authentifié
-| - Super Admin
-| - Admin Club
+|    Super Admin
+|    Admin Club
 |--------------------------------------------------------------------------
 */
+
+/*
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+----------------------------- Pour ajouter un Super Admin manuellement-----------------------------
+
+ ==> Dans le terminal taper la command : php artisan tinker
+ ==> Puis coller ce code la :
+
+        \App\Models\User::create([
+            'email' => 'admin@enset.ma',
+            'password' => bcrypt('password123'), // ou un autre mot de passe sécurisé
+            'role' => 'super_admin',
+            'club_id' => null
+        ]);
+ ==> Puis taper ctrl+c pour terminer
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
+ * */
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------

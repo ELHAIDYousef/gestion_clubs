@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('logo')->nullable();
             $table->text('description')->nullable();
-            $table->string('email')->nullable()->unique();
-            $table->string('phone')->nullable()->unique();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
             $table->string('facebook')->nullable();
             $table->string('instagram')->nullable();
+            $table->boolean('active')->nullable()->default(true);
             $table->timestamps();
         });
     }

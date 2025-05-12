@@ -42,27 +42,37 @@ class EventsController extends Controller{
     // cette  fonction permmet de liste tous les 10 evenement dernier
     public function index(Request $req){
         try{
-            $serche=$req->query('searche');
-            if(!empty($serche)){
-                $tab=Announcement::where("title","like","%$serche%")->orWhere("description","like","%$serche%")->get();
-            } else{
-                $tab=Announcement::orderBy('id', 'desc')->limit(10)->get();
-                foreach($tab as $ele){
-                $ele->image=asset($ele->image);
-            }
-            }
-            if(empty($tab)){
-                return response()->JSON(["Message"=>"Note found"]);    
-            }else{
-                return response()->JSON(["les 10 dérnire event"=>$tab]);
-            }
-            
-        }catch(Exception $e){
-            return response()->JSON(["message"=>"Something went worng!",
-                                     "errer"=>$e->getMessage()]);
-        }
+            $serche = $req->query('search');
+            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
+            $page = $req->query('page', 1); // Valeur par défaut à la page 1
 
+            if(!empty($serche)){
+                $tab = Announcement::where("title", "like", "%$serche%")
+                    ->orWhere("description", "like", "%$serche%")
+                    ->paginate($perPage, ['*'], 'page', $page);
+            } else {
+                $tab = Announcement::orderBy('id', 'desc')
+                    ->paginate($perPage, ['*'], 'page', $page);
+
+                foreach($tab as $ele) {
+                    $ele->image = asset($ele->image);
+                }
+            }
+
+            if($tab->isEmpty()){
+                return response()->json(["Message" => "No announcements found"]);
+            } else {
+                return response()->json(["Last announcements" => $tab]);
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong!",
+                "error" => $e->getMessage()
+            ]);
+        }
     }
+
     // cette  fonction permmet return un evenement en utilisen sont id
     public function show($id){
         try{
@@ -121,20 +131,28 @@ class EventsController extends Controller{
 
     }
     // pour afficher les event d'un club spicifique
-    public function clubEvent($id){
+    public function clubEvent($id, Request $req){
         try{
-            $activty=Announcement::select('Announcements.*')
-                            ->where('club_id',$id)
-                            ->orderBy('id','desc')
-                            ->limit(10)
-                            ->get();
-            return response()->JSON(['the last Anencement of clubs '.Club::find($id)->name=>$activty]);
-        }catch(Exception $e){
-            return response()->JSON(["message"=>"Something went worng",
-                                      "errer"=>$e->getMessage()
-                                    ]);
-        }
+            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
+            $page = $req->query('page', 1); // Valeur par défaut à la page 1
 
+            $activty = Announcement::select('Announcements.*')
+                ->where('club_id', $id)
+                ->orderBy('id', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'the last announcements of club ' . Club::find($id)->name => $activty
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong",
+                "error" => $e->getMessage()
+            ]);
+        }
     }
+
+
 
 }

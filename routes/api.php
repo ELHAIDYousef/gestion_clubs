@@ -104,6 +104,9 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
 
     // Création d’un compte admin de club
     Route::post('/admins', [UserManagementController::class, 'createClubAdmin']);
+    Route::get('clubs/{clubId}/users/details', [\App\Http\Controllers\ClubController::class, 'indexSuperAdmin']);
+
+
 
     // Ajout d’un club
     Route::post('clubs', [\App\Http\Controllers\ClubController::class, 'store']);
@@ -112,10 +115,12 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
     // Supprimer un club
     Route::delete('clubs/{id}', [\App\Http\Controllers\ClubController::class, 'destroy']);
 
+
     // Gestion des salles (CRUD)
     Route::apiResource('salles', \App\Http\Controllers\SalleController::class);
     // Mise à jour personnalisée d’une salle
     Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
+    Route::get('/salles/available', [\App\Http\Controllers\SalleController::class, 'getAvailableSalles']);
 
     // Liste de tous les matériels
     Route::get('materials', [\App\Http\Controllers\MaterialReservationController::class, 'index']);
@@ -125,13 +130,24 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
     Route::post('/materials/{id}/status', [\App\Http\Controllers\MaterialReservationController::class, 'updateStatus']);
 
 
+
     // Liste des réservations de salle
     Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
-    // Détail d’une réservation de salle
-    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
     // Mise à jour du statut d'une réservation de salle
     Route::post('salle_reservation/{id}/status', [\App\Http\Controllers\SalleReservationController::class, 'updateStatus']);
+    // Détail d’une réservation de salle
+    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+    Route::get('/club/{clubId}/reservations', [\App\Http\Controllers\SalleReservationController::class, 'getClubReservationsByStatus']);
 
+
+    // Liste des utilisateurs avec recherche par email
+    Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
+    // Créer un nouvel utilisateur
+    Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
+    // Afficher un utilisateur spécifique
+    Route::get('/users/{id}', [\App\Http\Controllers\UserController::class, 'show']);
+    // Supprimer un utilisateur
+    Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
 });
 
 

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('facebook')->nullable();
             $table->string('instagram')->nullable();
+            $table->string('linkedin')->nullable();
             $table->boolean('active')->nullable()->default(true);
             $table->timestamps();
         });

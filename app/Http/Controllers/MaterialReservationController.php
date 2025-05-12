@@ -12,14 +12,23 @@ class MaterialReservationController extends Controller
     /**
      * Display a listing of all material reservations.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reservations = Material_Reservation::with('club')->get()->map(function ($reservation) {
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+
+        $reservations = Material_Reservation::with('club')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        // Formatage des données paginées
+        $reservations->getCollection()->transform(function ($reservation) {
             return $this->formatReservationResponse($reservation);
         });
 
         return response()->json($reservations);
     }
+
 
     /**
      * Store a newly created material reservation in storage.

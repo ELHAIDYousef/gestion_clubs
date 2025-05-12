@@ -13,17 +13,72 @@ class ClubController extends Controller
     /**
      * Display a listing of all clubs.
      */
-    public function index()
+
+    public function index(Request $req)
     {
-        // Retrieve all clubs and transform the data
-        $clubs = Club::all()->map(function ($club) {
-            return $this->formatClubResponse($club);
-        });
+        try {
 
-        //Log::info('Get all clubs');
+            $perPage = $req->query('per_page', 10);
+            $page = $req->query('page', 1);
 
-        return response()->json($clubs);
+
+            $clubs = Club::orderBy('name', 'asc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json($clubs);
+
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong",
+                "error" => $e->getMessage()
+            ]);
+        }
     }
+
+    public function indexSuperAdmin(Request $request, $clubId)
+    {
+        try {
+            $perPage = $request->query('per_page', 10);
+            $page = $request->query('page', 1);
+            $search = $request->query('email');
+
+            $club = Club::find($clubId);
+
+            if (!$club) {
+                return response()->json(['message' => 'Club not found'], 404);
+            }
+
+            $query = $club->users(); // Get the users related to this specific club
+
+            // Apply search filter if necessary
+            if (!empty($search)) {
+                $query->where('email', 'like', "%$search%");
+            }
+
+            $users = $query->orderBy('id', 'desc')->paginate($perPage, ['*'], 'page', $page);
+
+            // Format the response with the necessary details
+            $formattedUsers = $users->map(function ($user) use ($club) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name, // Assuming the user has a 'name' field
+                    'email' => $user->email,
+                    'club_name' => $club->name, // Club name
+                    'club_phone' => $club->phone, // Club phone
+                    'club_email' => $club->email, // Club email
+                    'status' => $user->status, // Assuming the 'status' field exists on the user
+                ];
+            });
+
+            return response()->json($formattedUsers);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     /**
      * Store a newly created club in storage.
@@ -50,6 +105,7 @@ class ClubController extends Controller
                 'phone' => $request->phone,
                 'facebook' => $request->facebook,
                 'instagram' => $request->instagram,
+                'linkedin' => $request->linkedin,
                 'active' => $active,
             ]);
 
@@ -117,6 +173,7 @@ class ClubController extends Controller
                 'phone' => 'nullable|string|max:20',
                 'facebook' => 'nullable|string|max:255',
                 'instagram' => 'nullable|string|max:255',
+                'linkedin' => 'nullable|string|max:255',
                 'active' => 'nullable|string|in:true,false|max:5',
             ]);
 
@@ -176,11 +233,8 @@ class ClubController extends Controller
 
             $validatedData['active'] = $active;
 
-
             // Update the 'active' field
             $club->update(['active' => $validatedData['active']]);
-
-            Log::info('Updated active status for club', ['club_id' => $id, 'active' => $validatedData['active']]);
 
             // Return the updated club
             return response()->json([
@@ -189,9 +243,6 @@ class ClubController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error updating club active status: ' . $e->getMessage(), [
-                'request_data' => $request->all(),
-            ]);
             return response()->json([
                 'message' => 'Something went wrong!',
                 'error' => $e->getMessage(),
@@ -243,6 +294,7 @@ class ClubController extends Controller
             'phone' => $club->phone,
             'facebook' => $club->facebook,
             'instagram' => $club->instagram,
+            'linkedin' => $club->linkedin,
             'active' => (bool) $club->active,
         ];
     }

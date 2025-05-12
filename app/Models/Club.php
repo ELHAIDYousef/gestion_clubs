@@ -17,6 +17,7 @@ class Club extends Model
         'phone',
         'facebook',
         'instagram',
+        'linkedin',
         'active'
     ];
 
@@ -44,6 +45,11 @@ class Club extends Model
     {
         return $this->hasMany(Material_Reservation::class);
     }
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
 
 
 }

@@ -41,42 +41,44 @@ class ActivityController extends Controller
     //cette fonction pour obtuner les 10 dernier Activite
     public function index(Request $req){
         try{
-            $serche=$req->query('searche');
-            if(!empty($serche)){
-                $tab=Activity::where("title","like","%$serche%")->orWhere("description","like","%$serche%")->get();
-                foreach($tab as $ele){
-                    $images=json_decode($ele->images);
-                    $pthe=[];
-                    foreach($images as $image){
-                        $pthe[]=asset($image);
-                    }
-                    $ele->images=$pthe;
-                }
-            }
-            else{
-                $tab=Activity::orderby("id","desc")->limit(10)->get();
-                foreach($tab as $ele){
-                    $images=json_decode($ele->images);
-                    $pthe=[];
-                    foreach($images as $image){
-                        $pthe[]=asset($image);
-                    }
-                    $ele->images=$pthe;
-                }
-            }
-            if(count($tab)==0){
-                return response()->JSON(["Message"=>"Note found"]);    
-            }else{
-                return response()->json(["Last 10 Activities"=>$tab]);;
-            }
-            
-            
-        }catch(Exception $e){
-            return response()->JSON(["message"=>"Something went worng!",
-                                     "errer"=>$e->getMessage()]);
-        }
+            $serche = $req->query('search');
+            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
+            $page = $req->query('page', 1); // Valeur par défaut à la page 1
 
+            if(!empty($serche)){
+                $tab = Activity::where("title", "like", "%$serche%")
+                    ->orWhere("description", "like", "%$serche%")
+                    ->paginate($perPage, ['*'], 'page', $page);
+            } else {
+                $tab = Activity::orderBy('id', 'desc')
+                    ->paginate($perPage, ['*'], 'page', $page);
+            }
+
+            // Formatage des images
+            foreach($tab as $ele) {
+                $images = json_decode($ele->images);
+                $pthe = [];
+                foreach($images as $image) {
+                    $pthe[] = asset($image);
+                }
+                $ele->images = $pthe;
+            }
+
+            if($tab->isEmpty()) {
+                return response()->json(["Message" => "No activity found"]);
+            } else {
+                return response()->json(["Activities" => $tab]);
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong!",
+                "error" => $e->getMessage()
+            ]);
+        }
     }
+
+
     //cette fonction pour obtuner un activite
     public function show($id){
         try{
@@ -162,26 +164,33 @@ class ActivityController extends Controller
 
     }
     // cette fonction pour donne les activiti d'un club spécifique
-    public function clubActivity($id){
+    public function clubActivity($id, Request $req){
         try{
+            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
+            $page = $req->query('page', 1); // Valeur par défaut à la page 1
+
             if(is_numeric($id)){
-                $activty=Activity::select('activities.*')
-                                            ->where('club_id',$id)
-                                            ->orderBy('id','desc')
-                                            ->limit(10)
-                                            ->get();
-                return response()->JSON(['the last activite of clubs '.Club::find($id)->name=>$activty]);
-            }else{
-                return response()->JSON(["message","Something went worng"]);
+                $activty = Activity::select('activities.*')
+                    ->where('club_id', $id)
+                    ->orderBy('id', 'desc')
+                    ->paginate($perPage, ['*'], 'page', $page);
+
+                return response()->json([
+                    'the last activities of club ' . Club::find($id)->name => $activty
+                ]);
+            } else {
+                return response()->json(["message" => "Invalid club ID"]);
             }
 
-        }catch(Exception $e){
-            return response()->JSON(["message"=>"Something went worng",
-                                      "errer"=>$e->getMessage()
-                                    ]);
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong",
+                "error" => $e->getMessage()
+            ]);
         }
-
     }
+
+
 }
 
 

@@ -11,10 +11,16 @@ class SalleController extends Controller
     /**
      * Display a listing of all salles.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Retrieve all salles and transform the data
-        $salles = Salle::all()->map(function ($salle) {
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+
+        $salles = Salle::orderBy('name', 'asc')  // Sort salles by name alphabetically
+        ->paginate($perPage, ['*'], 'page', $page);
+
+        // Apply custom formatting
+        $salles->getCollection()->transform(function ($salle) {
             return $this->formatSalleResponse($salle);
         });
 
@@ -57,6 +63,23 @@ class SalleController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function getAvailableSalles(Request $request)
+    {
+        $perPage = $request->query('per_page', 10);
+        $page = $request->query('page', 1);
+
+        $salles = Salle::where('availability', true)  // Only available salles
+        ->orderBy('name', 'asc')  // Sort by name alphabetically
+        ->paginate($perPage, ['*'], 'page', $page);
+
+        // Apply custom formatting
+        $salles->getCollection()->transform(function ($salle) {
+            return $this->formatSalleResponse($salle);
+        });
+
+        return response()->json($salles);
     }
 
     /**

@@ -116,9 +116,11 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
     Route::delete('clubs/{id}', [\App\Http\Controllers\ClubController::class, 'destroy']);
 
 
-    // Gestion des salles (CRUD)
-    Route::apiResource('salles', \App\Http\Controllers\SalleController::class);
-    // Mise à jour personnalisée d’une salle
+       // Mise à jour personnalisée d’une salle
+    Route::get('salles', [\App\Http\Controllers\SalleController::class, 'index']);
+    Route::get('salles/{id}', [\App\Http\Controllers\SalleController::class, 'show']);
+    Route::post('salles', [\App\Http\Controllers\SalleController::class, 'store']);
+    Route::delete('salles/{id}', [\App\Http\Controllers\SalleController::class, 'destroy']);
     Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
     Route::get('/salles/available', [\App\Http\Controllers\SalleController::class, 'getAvailableSalles']);
 
@@ -160,8 +162,6 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
 
     // Mettre à jour un club (son propre club)
     Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, 'update']);
-    // Activer/désactiver un club
-    Route::post('/clubs/{id}/active', [\App\Http\Controllers\ClubController::class, 'updateActiveStatus']);
 
     // Créer une réservation de matériel
     Route::post('materials', [\App\Http\Controllers\MaterialReservationController::class, 'store']);
@@ -194,5 +194,6 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
     Route::post('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'update']);
     // Supprimer une activité
     Route::delete('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'destroy']);
+
 
 });

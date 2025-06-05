@@ -137,7 +137,6 @@ class ClubController extends Controller
         if (!$club) {
             return response()->json(['message' => 'Club not found'], 404);
         }
-        //Log::info('Show club');
 
         return response()->json($this->formatClubResponse($club));
     }

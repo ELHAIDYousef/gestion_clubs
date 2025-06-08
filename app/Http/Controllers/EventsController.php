@@ -62,7 +62,7 @@ class EventsController extends Controller{
             if($tab->isEmpty()){
                 return response()->json(["Message" => "No announcements found"]);
             } else {
-                return response()->json(["Last announcements" => $tab]);
+                return response()->json($tab);
             }
 
         } catch (Exception $e) {
@@ -131,19 +131,22 @@ class EventsController extends Controller{
 
     }
     // pour afficher les event d'un club spicifique
-    public function clubEvent($id, Request $req){
-        try{
-            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
-            $page = $req->query('page', 1); // Valeur par défaut à la page 1
+    public function clubEvent($id, Request $req) {
+        try {
+            $perPage = $req->query('per_page', 12);
+            $page = $req->query('page', 1);
 
-            $activty = Announcement::select('Announcements.*')
-                ->where('club_id', $id)
+            $activity = Announcement::where('club_id', $id)
                 ->orderBy('id', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page);
 
-            return response()->json([
-                $activty
-            ]);
+            // Format image URLs
+            $activity->getCollection()->transform(function ($item) {
+                $item->image = asset($item->image);
+                return $item;
+            });
+
+            return response()->json($activity);
 
         } catch (Exception $e) {
             return response()->json([

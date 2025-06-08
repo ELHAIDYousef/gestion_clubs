@@ -67,7 +67,7 @@ class ActivityController extends Controller
             if($tab->isEmpty()) {
                 return response()->json(["Message" => "No activity found"]);
             } else {
-                return response()->json([$tab]);
+                return response()->json($tab);
             }
 
         } catch (Exception $e) {
@@ -164,23 +164,32 @@ class ActivityController extends Controller
 
     }
     // cette fonction pour donne les activiti d'un club spécifique
-    public function clubActivity($id, Request $req){
-        try{
-            $perPage = $req->query('per_page', 12);  // Valeur par défaut à 10
-            $page = $req->query('page', 1); // Valeur par défaut à la page 1
+    public function clubActivity($id, Request $req)
+    {
+        try {
+            $perPage = $req->query('per_page', 12);  // Default 12 per page
+            $page = $req->query('page', 1); // Default page 1
 
-            if(is_numeric($id)){
-                $activty = Activity::select('activities.*')
-                    ->where('club_id', $id)
-                    ->orderBy('id', 'desc')
-                    ->paginate($perPage, ['*'], 'page', $page);
-
-                return response()->json([
-                    'the last activities of club ' . Club::find($id)->name => $activty
-                ]);
-            } else {
+            if (!is_numeric($id)) {
                 return response()->json(["message" => "Invalid club ID"]);
             }
+
+            $activity = Activity::where('club_id', $id)
+                ->orderBy('id', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            // Format image URLs
+            $activity->getCollection()->transform(function ($item) {
+                if ($item->images) {
+                    $decodedImages = json_decode($item->images);
+                    if (is_array($decodedImages)) {
+                        $item->images = array_map(fn($img) => asset($img), $decodedImages);
+                    }
+                }
+                return $item;
+            });
+
+            return response()->json($activity);
 
         } catch (Exception $e) {
             return response()->json([

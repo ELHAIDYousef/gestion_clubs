@@ -17,17 +17,23 @@ class ClubController extends Controller
     public function index(Request $req)
     {
         try {
-
             $perPage = $req->query('per_page', 10);
             $page = $req->query('page', 1);
 
-
+            // Get paginated clubs
             $clubs = Club::orderBy('name', 'asc')
-            ->paginate($perPage, ['*'], 'page', $page);
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            // Format each club in the collection
+            $formattedClubs = $clubs->getCollection()->map(function ($club) {
+                return $this->formatClubResponse($club);
+            });
+
+            // Rebuild paginator with formatted data
+            $clubs->setCollection($formattedClubs);
 
             return response()->json($clubs);
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "message" => "Something went wrong",
                 "error" => $e->getMessage()

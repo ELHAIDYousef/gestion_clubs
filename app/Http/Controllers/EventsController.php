@@ -142,7 +142,7 @@ class EventsController extends Controller{
                 ->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-                'the last announcements of club ' . Club::find($id)->name => $activty
+                $activty
             ]);
 
         } catch (Exception $e) {

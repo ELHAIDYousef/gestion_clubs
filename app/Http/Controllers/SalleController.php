@@ -109,7 +109,7 @@ class SalleController extends Controller
 
             // Validate the incoming request data
             $validatedData = $request->validate([
-                'name' => 'nullable|string|unique:salles|max:255',
+                'name' => 'nullable|string|max:255',
                 'availability' => 'nullable|string|in:true,false|max:5',
             ]);
 

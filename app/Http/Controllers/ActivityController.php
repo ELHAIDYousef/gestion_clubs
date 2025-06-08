@@ -67,7 +67,7 @@ class ActivityController extends Controller
             if($tab->isEmpty()) {
                 return response()->json(["Message" => "No activity found"]);
             } else {
-                return response()->json(["Activities" => $tab]);
+                return response()->json([$tab]);
             }
 
         } catch (Exception $e) {

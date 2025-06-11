@@ -90,7 +90,7 @@ class ActivityController extends Controller
                     $pathe[]=asset($image);
                 }
                 $tab->images=$pathe;
-                return response()->JSON(["the Activity ".$tab['title']=>$tab]);
+                return response()->JSON($tab);
             } else{
                 return response()->JSON(["message"=>"Activity does not exist."]);
             }

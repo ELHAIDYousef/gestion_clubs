@@ -11,11 +11,46 @@ class SalleReservationController extends Controller
     /**
      * Display a listing of all salle reservations.
      */
-    public function index()
+    // public function index()
+    // {
+    //     try {
+    //         $reservations = Salle_Reservation::with(['club', 'salle'])->get()->map(function ($reservation) {
+    //             // Update status if time has passed
+    //             $currentTime = now();
+    //             $endTime = $reservation->date . ' ' . $reservation->end_time;
+
+    //             if ($currentTime > $endTime && $reservation->status != 'finished') {
+    //                 $reservation->status = 'finished';
+    //                 $reservation->save();
+    //             }
+
+    //             return $this->formatReservationResponse($reservation);
+    //         });
+
+    //         return response()->json($reservations);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Something went wrong!',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    public function index(Request $request)
     {
         try {
-            $reservations = Salle_Reservation::with(['club', 'salle'])->get()->map(function ($reservation) {
-                // Update status if time has passed
+            // Récupérer les paramètres de pagination
+            $perPage = $request->query('per_page', 10);
+            $page = $request->query('page', 1);
+
+            // Récupérer les réservations avec pagination (avec relations)
+            $reservationsQuery = Salle_Reservation::with(['club', 'salle']);
+
+            // Obtenir les résultats paginés
+            $reservationsPaginated = $reservationsQuery->paginate($perPage, ['*'], 'page', $page);
+
+            // Transformer chaque élément + mise à jour du statut
+            $reservationsPaginated->getCollection()->transform(function ($reservation) {
                 $currentTime = now();
                 $endTime = $reservation->date . ' ' . $reservation->end_time;
 
@@ -27,7 +62,7 @@ class SalleReservationController extends Controller
                 return $this->formatReservationResponse($reservation);
             });
 
-            return response()->json($reservations);
+            return response()->json($reservationsPaginated);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Something went wrong!',

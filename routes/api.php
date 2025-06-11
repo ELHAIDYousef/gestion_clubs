@@ -91,9 +91,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Obtenir les infos de l’utilisateur connecté
     Route::get('/me', [AuthController::class, 'me']);
 
+    Route::get('materials', [\App\Http\Controllers\MaterialReservationController::class, 'index']);
+    Route::get('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'show']);
+
+    // Liste des réservations de salle
+    Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
+    // Détail d’une réservation de salle
+    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+
+
 });
-
-
 /*
 |--------------------------------------------------------------------------
 | ROUTES SUPER ADMIN (accessible uniquement par super_admin)
@@ -122,23 +129,21 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
     Route::post('salles', [\App\Http\Controllers\SalleController::class, 'store']);
     Route::delete('salles/{id}', [\App\Http\Controllers\SalleController::class, 'destroy']);
     Route::post('salles/update/{id}', [\App\Http\Controllers\SalleController::class, 'update']);
-    Route::get('/salles/available', [\App\Http\Controllers\SalleController::class, 'getAvailableSalles']);
 
-    // Liste de tous les matériels
-    Route::get('materials', [\App\Http\Controllers\MaterialReservationController::class, 'index']);
-    // Détails d’un matériel
-    Route::get('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'show']);
+//    // Liste de tous les matériels
+//    Route::get('materials', [\App\Http\Controllers\MaterialReservationController::class, 'index']);
+//    // Détails d’un matériel
+//    Route::get('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'show']);
+
     // Mise à jour du statut d’une réservation de matériel
     Route::post('/materials/{id}/status', [\App\Http\Controllers\MaterialReservationController::class, 'updateStatus']);
 
 
 
-    // Liste des réservations de salle
-    Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
+
     // Mise à jour du statut d'une réservation de salle
     Route::post('salle_reservation/{id}/status', [\App\Http\Controllers\SalleReservationController::class, 'updateStatus']);
-    // Détail d’une réservation de salle
-    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+
     Route::get('/club/{clubId}/reservations', [\App\Http\Controllers\SalleReservationController::class, 'getClubReservationsByStatus']);
 
 
@@ -152,9 +157,9 @@ Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
     Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
 });
 
-
 /*
-|-------------------------------------------------------------------------- ROUTES ADMIN CLUB (accessible uniquement par admin_club)
+|--------------------------------------------------------------------------
+ ROUTES ADMIN CLUB (accessible uniquement par admin_club)
 |--------------------------------------------------------------------------
 */
 
@@ -162,6 +167,7 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
 
     // Mettre à jour un club (son propre club)
     Route::post('clubs/update/{id}', [\App\Http\Controllers\ClubController::class, 'update']);
+
 
     // Créer une réservation de matériel
     Route::post('materials', [\App\Http\Controllers\MaterialReservationController::class, 'store']);
@@ -171,11 +177,11 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
     Route::delete('materials/{id}', [\App\Http\Controllers\MaterialReservationController::class, 'destroy']);
 
     // Liste des réservations de salle (du club)
-    Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
+//    Route::get('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'index']);
     // Créer une réservation de salle
     Route::post('salle_reservation', [\App\Http\Controllers\SalleReservationController::class, 'store']);
     // Détail d’une réservation de salle
-    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
+//    Route::get('salle_reservation/{id}', [\App\Http\Controllers\SalleReservationController::class, 'show']);
     // Mettre à jour une réservation de salle
     Route::post('salle_reservation/update/{id}', [\App\Http\Controllers\SalleReservationController::class, 'update']);
     // Supprimer une réservation de salle
@@ -194,6 +200,8 @@ Route::middleware(['auth:sanctum', 'role:admin_club'])->group(function () {
     Route::post('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'update']);
     // Supprimer une activité
     Route::delete('/activities/{id}', [\App\Http\Controllers\ActivityController::class, 'destroy']);
+
+    Route::get('/salles-available', [\App\Http\Controllers\SalleController::class, 'getAvailableSalles']);
 
 
 });

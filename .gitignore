@@ -1,0 +1,61 @@
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+
+# Environment Files
+# Note: .env.example is safe to commit (no secrets)
+# Only actual .env files should be ignored
+.env
+.env.backup
+.env.*.local
+.env.production
+.env.local
+
+.phpunit.result.cache
+.phpunit.xml.backup
+Homestead.json
+Homestead.yaml
+docker-compose.override.yml
+
+# IDE & Editor Files
+/.fleet
+/.idea
+/.vscode
+.DS_Store
+Thumbs.db
+
+# Dependency Files (lock files for apps, not packages)
+composer.lock
+
+# Package Manager Debug Logs
+npm-debug.log
+yarn-error.log
+
+# Authentication & Credentials
+auth.json
+.ssh/
+*.pem
+*.key
+*.crt
+
+# Application Logs & Cache
+/storage/logs/
+/storage/debugbar/
+/bootstrap/cache/
+
+# PHP Code Quality Tools
+.php-cs-fixer.cache
+.phpstan.cache
+.phan.cache
+
+# OS Files
+.rnd
+._*
+
+# IDE Cache
+.vscode/settings.json
+.idea/workspace.xml
